@@ -24,7 +24,7 @@ app.get("/modules/count/:id", async function (req, res) {
 
   async function getSlideModule(db, id) {
     return new Promise((resolve, reject) => {
-      db.get(`SELECT * FROM slide_module WHERE id=?`, id, (err, row) => {
+      db.get(`SELECT * FROM slide_module WHERE id = ?`, id, (err, row) => {
         if (err) reject(err);
         resolve(row);
       });
@@ -58,7 +58,6 @@ app.get("/modules/count/:id", async function (req, res) {
 
 app.post("/modules", async function (req, res) {
     const module = req.body;
-    const { name, transition_delay_secs, slides } = module;
 
     async function insertSlideModule(db, name, transition_delay_secs) {
       return new Promise((resolve, reject) => {
@@ -73,12 +72,12 @@ app.post("/modules", async function (req, res) {
       });
     }
 
-    const moduleId = await insertSlideModule(db, name, transition_delay_secs);
+    const moduleId = await insertSlideModule(db, module.name, module.transition_delay_secs);
+    
+    const slidesElements = db.prepare('INSERT INTO slide(content, module_id) VALUES (?, ?)')
 
-    const slidesElements = db.prepare('INSERT INTO person(name, age) VALUES (?, ?)')
-
-    slides.forEach((slide) => {
-        slidesElements.run([slide.content]) // can also use `slidesElements.get(...)`, `slidesElements.all(...)`, etc.
+    module.slides.forEach((slide) => {
+        slidesElements.run([slide.content, moduleId]) // can also use `slidesElements.get(...)`, `slidesElements.all(...)`, etc.
     })
 
     slidesElements.finalize()
