@@ -56,6 +56,37 @@ app.get("/modules/count/:id", async function (req, res) {
 // the module and the children in the database, and finally returns the newly-created
 // module's id
 
+app.post("/modules", async function (req, res) {
+    const module = req.body;
+    const { name, transition_delay_secs, slides } = module;
+
+    async function insertSlideModule(db, name, transition_delay_secs) {
+      return new Promise((resolve, reject) => {
+        db.run(
+          `INSERT INTO slide_module (name, transition_delay_secs) VALUES (?, ?)`,
+          [name, transition_delay_secs],
+          function (err) {
+            if (err) reject(err);
+            resolve(this.lastID);
+          }
+        );
+      });
+    }
+
+    const moduleId = await insertSlideModule(db, name, transition_delay_secs);
+
+    const slidesElements = db.prepare('INSERT INTO person(name, age) VALUES (?, ?)')
+
+    slides.forEach((slide) => {
+        slidesElements.run([slide.content]) // can also use `slidesElements.get(...)`, `slidesElements.all(...)`, etc.
+    })
+
+    slidesElements.finalize()
+
+    res.send({ id: moduleId });
+    }
+);
+
 /////////////////////////////////////////////////////////////////
 // In-memory DB initialization and start of express server here.
 // Candidates should not modify any below.
