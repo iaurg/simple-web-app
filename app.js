@@ -19,7 +19,7 @@ app.get("/modules/count", function (req, res) {
 
 // Task 1: Create a route that accepts an id parameter and returns JSON containing the module
 // with that id and it's children modules
-app.get("/modules/count/:id", async function (req, res) {
+app.get("/modules/:id", async function (req, res) {
   const paramId = req.params.id;
 
   async function getSlideModule(db, id) {
@@ -73,7 +73,7 @@ app.post("/modules", async function (req, res) {
     }
 
     const moduleId = await insertSlideModule(db, module.name, module.transition_delay_secs);
-    
+
     const slidesElements = db.prepare('INSERT INTO slide(content, module_id) VALUES (?, ?)')
 
     module.slides.forEach((slide) => {
